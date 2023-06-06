@@ -5,18 +5,19 @@
 #include <QCamera>
 
 #include <QDebug>
-#include <QGraphicsVideoItem>
-#include <QGraphicsView>
 #include <QScopedPointer>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <QtGlobal>
 
 #if QT_VERSION >= 0x060000
 #include <QCameraFormat>
+#include <QGraphicsVideoItem>
+#include <QGraphicsView>
 #include <QMediaCaptureSession>
 #include <QMediaDevices>
 #else
+#include <QCameraInfo>
+#include <QCameraViewfinder>
 #endif
 
 class Camera : public QWidget
@@ -29,19 +30,22 @@ public:
 public:
     QSize getDefaultCamerResolution();
     void  resizeCameraShow(int x, int y, int width, int height);
+    void  playCamera();
 
 private:
     void initLayout();
     void initCamera();
 
 private:
+    QVBoxLayout*            mainLayout;
     QScopedPointer<QCamera> m_camera;
-    QGraphicsVideoItem*     m_graphicsVideoItem;
-    QGraphicsView*          m_cameraView;
-    QGraphicsScene*         m_cameraScene;
 #if QT_VERSION >= 0x060000
+    QGraphicsVideoItem*  m_graphicsVideoItem;
+    QGraphicsView*       m_cameraView;
+    QGraphicsScene*      m_cameraScene;
     QMediaCaptureSession m_captureSession;
 #else
+    QCameraViewfinder* m_viewfinder;
 #endif
 
 signals:

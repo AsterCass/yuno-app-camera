@@ -6,6 +6,7 @@
 #include "camera.h"
 #include <QDateTime>
 #include <QDebug>
+#include <QGridLayout>
 #include <QHostAddress>
 #include <QLabel>
 #include <QNetworkInterface>
@@ -53,6 +54,7 @@ private:
     QPushButton* btn;
     // main
     QWidget* mainFrame;
+    QWidget* m_mainMaskFrame;
     Camera*  camera;
 };
 

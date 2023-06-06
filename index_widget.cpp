@@ -7,8 +7,12 @@ IndexWidget::IndexWidget(QWidget* parent) : QWidget(parent)
     indexLayout = new QVBoxLayout();
     // set margin
     indexLayout->setSpacing(0);
+#if QT_VERSION >= 0x060000
     // indexFrame->setContentsMargins(0, 0, 0, 0);
     indexLayout->unsetContentsMargins();
+#else
+    indexLayout->setMargin(0);
+#endif
     // cell
     indexLayout->addWidget(crateHeaderFrame());
     indexLayout->addWidget(createTitleFrame());
@@ -39,6 +43,7 @@ IndexWidget::~IndexWidget()
     delete titleFrame;
     // main
     delete camera;
+    delete m_mainMaskFrame;
     delete mainFrame;
     // index
     delete indexLayout;
@@ -60,6 +65,9 @@ QWidget* IndexWidget::crateHeaderFrame()
         QDateTime curDateTime    = QDateTime::currentDateTime();
         QString   curDateTimeStr = curDateTime.toString("yyyy.MM.dd hh:mm dddd");
         timeShow->setText(curDateTimeStr);
+        QFont font = timeShow->font();
+        font.setPointSize(8);
+        timeShow->setFont(font);
         QPalette pal = QPalette();
         pal.setColor(QPalette::WindowText, Qt::white);
         timeShow->setAutoFillBackground(true);
@@ -80,6 +88,9 @@ QWidget* IndexWidget::crateHeaderFrame()
                 if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
                 {
                     lineLabel->setText(QString::fromUtf8("有线: ") + address.toString());
+                    QFont font = lineLabel->font();
+                    font.setPointSize(6);
+                    lineLabel->setFont(font);
                     QPalette pal = QPalette();
                     pal.setColor(QPalette::WindowText, Qt::white);
                     lineLabel->setAutoFillBackground(true);
@@ -91,6 +102,9 @@ QWidget* IndexWidget::crateHeaderFrame()
         {
             wifiLabel = new QLabel();
             wifiLabel->setText(QString::fromUtf8("无线: 192.168.0.1"));
+            QFont font = wifiLabel->font();
+            font.setPointSize(6);
+            wifiLabel->setFont(font);
             QPalette pal = QPalette();
             pal.setColor(QPalette::WindowText, Qt::white);
             wifiLabel->setAutoFillBackground(true);
@@ -151,17 +165,20 @@ QWidget* IndexWidget::createTitleFrame()
 QWidget* IndexWidget::createMainFrame()
 {
     mainFrame = new QWidget();
-    mainFrame->setObjectName("mainFrame");
-    mainFrame->setStyleSheet("#mainFrame{background-color:qlineargradient("
-                             "spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 #ffffff,stop:0.7 #ffffff ,stop:1 #165DFF)}");
     // camera
     camera = new Camera(mainFrame);
+    // mask
+    m_mainMaskFrame = new QWidget(mainFrame);
+    m_mainMaskFrame->setObjectName("mainFrame");
+    m_mainMaskFrame->setStyleSheet("#mainFrame{background-color:qlineargradient("
+                                   "spread:pad, x1:0, y1:0, x2:0, y2:1, stop:0 rgba(0, 0, 0,0 ),stop:0.7 rgba(0, 0, 0,0 ) ,stop:1 #165DFF)}");
     return mainFrame;
 }
 
 void IndexWidget::checkFaceSuccess()
 {
     qDebug() << "success";
+    camera->playCamera();
 }
 
 void IndexWidget::resizeEvent(QResizeEvent*)
@@ -189,4 +206,6 @@ void IndexWidget::resizeEvent(QResizeEvent*)
         y      = (widgetSize.height() - height) / 2;
     }
     camera->resizeCameraShow(x, y, width, height);
+    // mask
+    m_mainMaskFrame->resize(widgetSize.width(), widgetSize.height());
 }
