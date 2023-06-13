@@ -71,7 +71,6 @@ void IndexWidget::updateMsg()
         }
         for (const QNetworkAddressEntry& entry : address.addressEntries())
         {
-            qDebug() << entry.ip();
             if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol && entry.ip() != QHostAddress(QHostAddress::LocalHost))
             {
                 if (address.type() == QNetworkInterface::Wifi)
@@ -131,7 +130,7 @@ QWidget* IndexWidget::crateHeaderFrame()
         // line
         {
             lineLabel = new QLabel();
-            lineLabel->setText(QString::fromUtf8("无线: 未连接"));
+            lineLabel->setText(QString::fromUtf8("有线: 未连接"));
             QFont font = lineLabel->font();
             font.setPointSize(6);
             lineLabel->setFont(font);
