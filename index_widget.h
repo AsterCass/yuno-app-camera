@@ -12,6 +12,7 @@
 #include <QNetworkInterface>
 #include <QPushButton>
 #include <QSpacerItem>
+#include <QTimer>
 #include <QVBoxLayout>
 #include <QWidget>
 
@@ -34,10 +35,12 @@ private:
     QWidget* crateHeaderFrame();
     QWidget* createTitleFrame();
     QWidget* createMainFrame();
+    void     updateMsg();
 
 private:
     // index
     QVBoxLayout* indexLayout;
+    QTimer*      m_timer;
     // header
     QWidget*     headerFrame;
     QHBoxLayout* headerLayout;

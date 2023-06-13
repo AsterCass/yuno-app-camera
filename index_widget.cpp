@@ -24,6 +24,10 @@ IndexWidget::IndexWidget(QWidget* parent) : QWidget(parent)
     setLayout(indexLayout);
     // init size
     resize(400, 640);
+    // timer
+    m_timer = new QTimer(this);
+    connect(m_timer, &QTimer::timeout, this, &IndexWidget::updateMsg);
+    m_timer->start(10000);
 }
 
 IndexWidget::~IndexWidget()
@@ -46,7 +50,52 @@ IndexWidget::~IndexWidget()
     delete m_mainMaskFrame;
     delete mainFrame;
     // index
+    delete m_timer;
     delete indexLayout;
+}
+
+void IndexWidget::updateMsg()
+{
+    // update  time
+    QDateTime curDateTime    = QDateTime::currentDateTime();
+    QString   curDateTimeStr = curDateTime.toString("yyyy.MM.dd hh:mm dddd");
+    timeShow->setText(curDateTimeStr);
+    // update ip
+    bool hasWired    = false;
+    bool hasWireless = false;
+    for (const QNetworkInterface& address : QNetworkInterface::allInterfaces())
+    {
+        if (!address.flags().testFlag(QNetworkInterface::IsRunning))
+        {
+            continue;
+        }
+        for (const QNetworkAddressEntry& entry : address.addressEntries())
+        {
+            qDebug() << entry.ip();
+            if (entry.ip().protocol() == QAbstractSocket::IPv4Protocol && entry.ip() != QHostAddress(QHostAddress::LocalHost))
+            {
+                if (address.type() == QNetworkInterface::Wifi)
+                {
+                    hasWireless = true;
+                    wifiLabel->setText(QString::fromUtf8("无线: ") + entry.ip().toString());
+                }
+                else
+                {
+                    hasWired = true;
+                    lineLabel->setText(QString::fromUtf8("有线: ") + entry.ip().toString());
+                }
+            }
+        }
+    }
+    if (!hasWired)
+    {
+        lineLabel->setText(QString::fromUtf8("有线：无连接"));
+    }
+    if (!hasWireless)
+    {
+        wifiLabel->setText(QString::fromUtf8("无线：无连接"));
+    }
+    // else
 }
 
 QWidget* IndexWidget::crateHeaderFrame()
@@ -81,27 +130,20 @@ QWidget* IndexWidget::crateHeaderFrame()
         networkLayout->setContentsMargins(0, 0, 0, 0);
         // line
         {
-            lineLabel                     = new QLabel();
-            const QHostAddress& localhost = QHostAddress(QHostAddress::LocalHost);
-            for (const QHostAddress& address : QNetworkInterface::allAddresses())
-            {
-                if (address.protocol() == QAbstractSocket::IPv4Protocol && address != localhost)
-                {
-                    lineLabel->setText(QString::fromUtf8("有线: ") + address.toString());
-                    QFont font = lineLabel->font();
-                    font.setPointSize(6);
-                    lineLabel->setFont(font);
-                    QPalette pal = QPalette();
-                    pal.setColor(QPalette::WindowText, Qt::white);
-                    lineLabel->setAutoFillBackground(true);
-                    lineLabel->setPalette(pal);
-                }
-            }
+            lineLabel = new QLabel();
+            lineLabel->setText(QString::fromUtf8("无线: 未连接"));
+            QFont font = lineLabel->font();
+            font.setPointSize(6);
+            lineLabel->setFont(font);
+            QPalette pal = QPalette();
+            pal.setColor(QPalette::WindowText, Qt::white);
+            lineLabel->setAutoFillBackground(true);
+            lineLabel->setPalette(pal);
         }
         // wifi
         {
             wifiLabel = new QLabel();
-            wifiLabel->setText(QString::fromUtf8("无线: 192.168.0.1"));
+            wifiLabel->setText(QString::fromUtf8("无线: 未连接"));
             QFont font = wifiLabel->font();
             font.setPointSize(6);
             wifiLabel->setFont(font);
